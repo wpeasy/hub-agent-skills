@@ -173,3 +173,157 @@ Propose installing the updates a connected WordPress website is waiting for (Wor
 - `id` (integer, required): The website's id
 - `names` (array): Only these (plugin or theme names, or WordPress for core). Leave out for everything waiting.
 
+## notes.update
+
+Change a task or feedback item: its status (open, in_progress, done), who it is given to (a team member's id, or 0 to take it off them), or pin or unpin any note. Find the note id with notes.search.
+
+- Kind: changes something
+- `id` (integer, required): The note's id
+- `status` (string): open, in_progress or done (tasks and feedback)
+- `assignee_id` (integer): A team member's user id, or 0 for no one
+- `text` (string): New wording for the note (plain text)
+- `pinned` (boolean): Pin (true) or unpin (false)
+
+## websites.set_monitoring
+
+Put a website on hold (nothing checks it, no alerts) or resume it (it is checked straight away). Say which one you are doing and why.
+
+- Kind: changes something
+- `id` (integer, required): The website's id
+- `paused` (boolean, required): true = put on hold, false = resume
+
+## websites.set_renewal
+
+Set (or clear) the date a website's domain registration runs out. Needed for .au domains, whose registry does not publish it. The Hub warns when it is within 30 days.
+
+- Kind: changes something
+- `id` (integer, required): The website's id
+- `renews_on` (string): The date as YYYY-MM-DD; leave out to clear it
+
+## websites.refresh
+
+Ask the Hub to look again at one thing about a website: "domain" (DNS, email, hosting, certificate, what it is built with), "connection" (ask the WordPress connector plugin to send its report now) or "links" (start a broken-link check; it takes a while and runs in the background).
+
+- Kind: changes something
+- `id` (integer, required): The website's id
+- `what` (string, required): domain, connection or links
+
+## backups.run
+
+Start a backup of one website now. A reason is required (it is kept with the backup). It runs in the background; read websites.backups later to see how it ended.
+
+- Kind: changes something
+- `id` (integer, required): The website's id
+- `comment` (string, required): Why the backup is wanted (3 to 500 characters)
+
+## clients.add
+
+Add a client (a business and its contact). It does not start a project or send anything. Search first so you do not add one twice.
+
+- Kind: changes something
+- `business_name` (string, required): The business name
+- `contact_name` (string, required): The contact person
+- `contact_email` (string, required): Their email address
+- `contact_phone` (string): Their phone
+
+## clients.update
+
+Change a client's details (business name, contact name, email, phone). Only the fields you give change. If the client is linked to WHMCS the change is sent there too.
+
+- Kind: changes something
+- `id` (integer, required): The client's id
+- `business_name` (string): New business name
+- `contact_name` (string): New contact name
+- `contact_email` (string): New email
+- `contact_phone` (string): New phone
+
+## clients.assign_website
+
+Make a website belong to a client. A website that belonged to another client moves, so check websites.get first and tell the person.
+
+- Kind: changes something
+- `client_id` (integer, required): The client's id
+- `website_id` (integer, required): The website's id
+
+## websites.edit
+
+Change a website's label, address (full, with https://) or client. Only what you give changes. A new address is checked straight away.
+
+- Kind: changes something
+- `id` (integer, required): The website's id
+- `label` (string): New label (empty text clears it)
+- `url` (string): New full address, with https://
+- `client_id` (integer): Client id, or 0 for no client
+
+## websites.set_type
+
+Tell the Hub what a website is built with when it got it wrong (a key such as wordpress, shopify, static), or give an empty type to go back to what the Hub detects.
+
+- Kind: changes something
+- `id` (integer, required): The website's id
+- `type` (string): The platform key, or empty for automatic
+
+## websites.set_checks
+
+Switch the Hub's jobs for one website on or off: uptime, domain, vulnerabilities, links, updates, backups, backup_core. Give only the ones to change, each true or false. The visitor shield is never changed by an agent.
+
+- Kind: changes something
+- `id` (integer, required): The website's id
+- `checks` (object, required): Job name => true or false
+
+## websites.links_action
+
+Ignore a broken link (for good or until a date), stop ignoring it, or look at it again. Give the link ids from websites.links. 'recheck' looks at up to 10 now.
+
+- Kind: changes something
+- `id` (integer, required): The website's id
+- `action` (string, required): ignore, unignore or recheck
+- `ids` (array, required): Link ids
+- `until` (string): Ignore until this date (YYYY-MM-DD); empty = for good
+
+## websites.ignore_update
+
+Set a waiting update aside (so it stops counting) or count it again. Give the website, whether it is a core, plugin or theme update, and its name as shown.
+
+- Kind: changes something
+- `id` (integer, required): The website's id
+- `action` (string, required): ignore or unignore
+- `kind` (string, required): core, plugin or theme
+- `name` (string, required): The update as named in websites.problems
+- `until` (string): Ignore until YYYY-MM-DD; empty = for good
+
+## websites.acknowledge_notice
+
+Acknowledge a 'possibly abandoned' or 'closed' plugin or theme warning (so it stops counting), with a note. Give website_id to cover one website, or leave it out for every website.
+
+- Kind: changes something
+- `type` (string, required): plugin or theme
+- `slug` (string, required): Its folder name
+- `kind` (string, required): closed or abandoned
+- `website_id` (integer): One website, or leave out for all
+- `note` (string): Why (up to 300 characters)
+
+## websites.group_update
+
+Rename a website group or pin or unpin it (pinned groups list first).
+
+- Kind: changes something
+- `id` (integer, required): The group's id
+- `name` (string): New name
+- `pinned` (boolean): Pin or unpin
+
+## websites.trace
+
+Step through how the Hub's server reaches a website (name lookup, connection, certificate, the page and redirects) and where it breaks. Changes nothing; sends real traffic, so use it when a website seems down.
+
+- Kind: changes something
+- `id` (integer, required): The website's id
+
+## backups.stop
+
+Stop a website backup that is running (it ends as 'stopped', not a failure). Needs the backup's id from websites.backups.
+
+- Kind: changes something
+- `id` (integer, required): The website's id
+- `backup_id` (integer, required): The running backup id
+

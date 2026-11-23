@@ -245,6 +245,66 @@ Make a website belong to a client. A website that belonged to another client mov
 - `client_id` (integer, required): The client's id
 - `website_id` (integer, required): The website's id
 
+## projects.propose_changes
+
+Propose NEW discovery content for a project: a location (name, address_line, suburb, state, postcode, phone, email), an item (kind product, page, social or inspiration; name; details), a customer group (name, with a list of questions), a question for an existing group (audience_id, question), a list entry (part, data) or business details (fields such as legal_name, abn, phone, email). Give each change a source. The person sees the whole list on a card and must press Apply; nothing is saved until then. For answers to existing fields use projects.propose_answers. Never invent details: only propose what you found.
+
+- Kind: proposes; a person must approve
+- `id` (integer, required): The project's id
+- `changes` (array, required): The changes to propose (1 to 25)
+
+## projects.add
+
+Propose starting a project for a client, on a named plan (use the plan name or key exactly as the person said; never choose one yourself). The person approves on a card; it makes the project and its meetings from the plan and sends nothing to the client.
+
+- Kind: proposes; a person must approve
+- `client_id` (integer, required): The client's id
+- `plan` (string, required): The plan's key or name
+- `name` (string): Project name (optional)
+
+## projects.rename
+
+Rename a project. (Plan, status, on hold, start date and deadline changes are not available to agents, except projects.change_plan.)
+
+- Kind: changes something
+- `id` (integer, required): The project's id
+- `name` (string, required): The new name
+
+## projects.change_plan
+
+Propose moving a project to a different plan (by the plan's key or name). The person approves on a card. Existing meetings are not changed.
+
+- Kind: proposes; a person must approve
+- `id` (integer, required): The project's id
+- `plan` (string, required): The plan's key or name
+
+## projects.client_access
+
+Propose changing what the client is asked to fill in on a project: whether they may add customer groups or questions (and until when), and which interview sections they are asked (section key => true or false; keys come from projects.interview). The person approves on a card. Nothing is emailed to the client.
+
+- Kind: proposes; a person must approve
+- `id` (integer, required): The project's id
+- `client_can_add_groups` (boolean): May the client add customer groups
+- `client_can_add_questions` (boolean): May the client add questions
+- `client_additions_until` (string): Last day they may add (YYYY-MM-DD), or empty for no limit
+- `sections` (object): Section key => true (ask the client) or false
+
+## projects.add_starter_questions
+
+Add the agency's standard customer questions to a project that has no customer groups yet.
+
+- Kind: changes something
+- `id` (integer, required): The project's id
+
+## projects.rename_document
+
+Rename a project's document group (every version keeps its place). Give the group's key from projects.get.
+
+- Kind: changes something
+- `id` (integer, required): The project's id
+- `type` (string, required): The document group key
+- `label` (string, required): The new name
+
 ## websites.edit
 
 Change a website's label, address (full, with https://) or client. Only what you give changes. A new address is checked straight away.

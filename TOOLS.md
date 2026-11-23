@@ -11,13 +11,33 @@ Load a playbook: step-by-step guidance for a kind of job done well with the Hub'
 
 ## websites.search
 
-Find websites the Hub watches. Search by name, address or client, and filter by status (up, down, maintenance, unknown) or by group name. Returns each website's id, address, status, group, client and what is waiting. Use websites.get for everything about one.
+Find websites the Hub watches. Search by name, address or client, and filter by status (up, down, maintenance, unknown) or by group name. Returns each website's id, address, status, group, client, what is waiting and the on/off state of every job the Hub does for it (uptime, domain, updates, vulnerabilities, backups, backup_core, shield, links). Filter by any of them (feature + feature_on), by any status dot (health + health_state), or by on hold. Use websites.get for everything about one.
 
 - Kind: looks only
 - `query` (string): Part of a name, address or client name
 - `status` (string): up, down, maintenance or unknown
 - `group` (string): A group name, or Default for websites in no group
-- `limit` (integer): How many to return (1 to 25, default 10)
+- `on_hold` (boolean): true = only websites on hold, false = only websites not on hold
+- `feature` (string): Filter by one of the Hub's jobs for a website: uptime, domain, updates, vulnerabilities, backups, backup_core, shield, links
+- `feature_on` (boolean): With feature: true = switched on, false = switched off (default true)
+- `health` (string): Filter by one status dot: vulnerabilities, core, plugins, themes, backup, domain, dns, mx, spf, dmarc, ssl, links
+- `health_state` (string): With health: ok, warn, bad, partial, busy, none (not known yet) or na (not applicable or switched off)
+- `hosting` (string): Hosting provider contains this (for example Vultr)
+- `dns` (string): DNS provider contains this (for example Cloudflare)
+- `email_provider` (string): Email provider contains this (for example Google Workspace)
+- `registrar` (string): Domain registrar contains this
+- `platform` (string): What it is built with contains this (WordPress, Shopify, Static site...)
+- `wp_version` (string): WordPress version starts with this (for example 7.1)
+- `domain_expires_within_days` (integer): Domain registration ends within this many days (0 or more)
+- `ssl_expires_within_days` (integer): Certificate ends within this many days
+- `no_good_backup_days` (integer): No successful backup in the last this many days
+- `has_vulnerabilities` (boolean): true = has an open vulnerability, false = has none
+- `has_broken_links` (boolean): true = has broken links, false = none
+- `client_id` (integer): Only this client's websites
+- `has_client` (boolean): false = only websites with no client
+- `include_health` (boolean): Also return every status dot for each website
+- `limit` (integer): How many to return (1 to 50, default 10)
+- `offset` (integer): Skip this many (to read the next page)
 
 ## websites.get
 
@@ -32,7 +52,12 @@ Find clients by business name, contact name or contact email. Returns each clien
 
 - Kind: looks only
 - `query` (string): Part of a business name, contact name or email
-- `limit` (integer): How many to return (1 to 25, default 10)
+- `business_type` (string): Their type of business, as set on the client
+- `has_projects` (boolean): true = has at least one project, false = has none
+- `has_websites` (boolean): true = has at least one website, false = has none (needs websites access)
+- `whmcs_linked` (boolean): true = linked to a WHMCS client, false = not linked (needs WHMCS access)
+- `limit` (integer): How many to return (1 to 50, default 10)
+- `offset` (integer): Skip this many (next page)
 
 ## projects.search
 
@@ -41,7 +66,12 @@ Find projects by name or client, optionally by status (active, on_hold, complete
 - Kind: looks only
 - `query` (string): Part of a project or client name
 - `status` (string): active, on_hold or completed
-- `limit` (integer): How many to return (1 to 25, default 10)
+- `state` (string): How it is going, as on the Projects list: on_track, at_risk, overdue, not_started, on_hold or completed
+- `waiting_on_client` (boolean): true = the client still has questions or items to answer, false = none
+- `plan` (string): The plan's key or name
+- `client_id` (integer): Only this client's projects
+- `limit` (integer): How many to return (1 to 50, default 10)
+- `offset` (integer): Skip this many (next page)
 
 ## projects.get
 
@@ -345,6 +375,53 @@ Propose a flow: new steps and how they connect, and/or changes to the name or se
 - `nodes` (array): New steps (up to 30)
 - `edges` (array): New connections (from and to are refs or existing node ids; handle true or false for a condition)
 - `changes` (array): Edits to existing steps: new name and/or settings (only the keys given change)
+
+## ui.open
+
+Open a page of the Hub on the person's screen, for example a client, a website's settings, a canvas, or a settings tab. Use it when they ask to go somewhere or when showing them is better than describing. It only opens what they could open themselves. Places: home = The Home page; projects = The projects list; project = One project (id); clients = The clients list; client = One client (id); websites = The websites list; tab: overview, websites, updates, vulnerabilities, abandoned, links, backups, tools; website = One website's settings screen (id); notes = The notes page; users = The users list; whmcs = The WHMCS page; canvas = The automation canvas; canvas: web_projects, clients, websites, whmcs, agency, agency_actions; events_log = The events log; event_switches = The event switches; connections = Connections (email, cloud storage, AI, Zoom, secrets); tab: email, storage, ai, zoom, secrets; settings = A settings screen; tab: appearance, lists, security, ai-access, general, branding, roles, email-log, meeting-types, interviews, plans, business-types, shared-forms, backups, notifications, websites, api-keys, ai-agent; documentation = The Documentation pages; help = The Help pages
+
+- Kind: looks only
+- `where` (string, required): The place key (for example canvas, website, client, settings)
+- `id` (integer): The record id for project, client or website
+- `tab` (string): A tab, for websites, connections or settings
+- `canvas` (string): A canvas key, for canvas (projects: web_projects, clients, websites, whmcs, agency, agency_actions)
+
+## automation.remove_nodes
+
+Remove steps from a canvas that YOU added earlier through automation.propose_flow (their connections go with them). It refuses a step a person made, and an event node that has been switched on. The canvas keeps a version, so a person can restore it.
+
+- Kind: changes something
+- `canvas` (string, required): The canvas key
+- `nodes` (array, required): The ids of the steps to remove (from automation.get_flow)
+
+## notes.remove
+
+Delete a note, task or decision that YOU added earlier with notes.add. It refuses any note a person wrote.
+
+- Kind: changes something
+- `id` (integer, required): The note's id
+
+## websites.count_by
+
+Count the agency's websites grouped by one thing, in one call: group, status, hosting provider, DNS provider, email provider, registrar, platform (what it is built with), WordPress version, PHP version or client. Use it for "how many" and "which providers" questions instead of listing websites. Optionally count only websites where a job is on or off.
+
+- Kind: looks only
+- `by` (string, required): group, status, hosting, dns, email, registrar, platform, wp_version, php_version, client
+- `feature` (string): Only websites where this job is on (or off, with feature_on false)
+- `feature_on` (boolean): With feature: true = on (default), false = off
+
+## websites.plugins
+
+Search the plugins or themes installed across all connected WordPress websites, as the connector plugins last reported them. Give a name to find which websites have it and at what version (add version_below to find old versions, update_waiting for ones with an update, active for ones switched on). Leave the name out to list which plugins are most common, with how many websites and which versions.
+
+- Kind: looks only
+- `kind` (string): plugin (default) or theme
+- `name` (string): Part of the plugin or theme name
+- `version_below` (string): Only versions older than this
+- `update_waiting` (boolean): true = only ones with an update waiting
+- `active` (boolean): true = only active ones, false = only inactive
+- `limit` (integer): How many rows (1 to 50, default 20)
+- `offset` (integer): Skip this many
 
 ## websites.edit
 

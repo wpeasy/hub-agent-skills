@@ -20,6 +20,6 @@ Flows run when something happens in the Hub (an event) and do steps: conditions,
 5. A person approves it on a card. After approval, say plainly: **the flow is created but it is switched OFF, and they must go to Settings > Automation > Canvas and switch the new event on.** Never say it is running.
 
 ## Limits
-You cannot switch an event on, delete steps or flows, or fill in secrets (API keys, headers): say that a person must. Nothing is removed by a proposal; it only adds steps and edits settings.
+You cannot switch an event on or fill in secrets (API keys, headers): say that a person must. A proposal only adds steps and edits settings. You may take out steps **you added yourself** with `automation.remove_nodes` (never a step a person made, and never an event node that has been switched on).
 
-These steps use the WP Easy Hub's tools (automation.canvases, automation.get_flow, automation.reference, automation.runs, automation.propose_flow), available when the Hub is connected as an MCP server.
+These steps use the WP Easy Hub's tools (automation.canvases, automation.get_flow, automation.reference, automation.runs, automation.propose_flow, automation.remove_nodes), available when the Hub is connected as an MCP server.

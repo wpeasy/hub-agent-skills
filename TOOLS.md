@@ -305,6 +305,47 @@ Rename a project's document group (every version keeps its place). Give the grou
 - `type` (string, required): The document group key
 - `label` (string, required): The new name
 
+## automation.canvases
+
+List the agency's automation canvases (one per area: projects, clients, websites, WHMCS, agency settings and actions) with the event nodes on each, whether each is switched on, and how many steps hang off it. Start here to find a flow, then use automation.get_flow.
+
+- Kind: looks only
+
+## automation.get_flow
+
+Read the steps and connections of one canvas, or just the chain that hangs off one event node (give event_node). Each step shows its type, name, on or off, its settings and anything it reaches outside the Hub (an email, an outside address). Secret values such as API keys are always hidden.
+
+- Kind: looks only
+- `canvas` (string, required): The canvas key from automation.canvases
+- `event_node` (string): Only the chain from this event node id
+
+## automation.reference
+
+What can be built: "steps" lists the kinds of step (type, what it does, its settings with their keys and kinds, what it saves) and "events" lists every event a flow can start from (key, area, what it means). Give type or query to narrow it. Use it before proposing a flow so the settings are right.
+
+- Kind: looks only
+- `what` (string, required): steps or events
+- `query` (string): Part of a name, type or key to search for
+
+## automation.runs
+
+The most recent runs of a canvas (which event, did it finish or fail, how long, any error), or one run with what each step did (give run_id). Use it to find out why a flow did not do what was expected. Data in a run is shown with sign-in links already hidden.
+
+- Kind: looks only
+- `canvas` (string): The canvas key
+- `run_id` (integer): One run, in full
+
+## automation.propose_flow
+
+Propose a flow: new steps and how they connect, and/or changes to the name or settings of existing steps. Read automation.reference first so step types and setting keys are right, and automation.get_flow to see what is there. Each new step needs a ref (a short letters-and-digits name you choose, used in connections), a type and its settings; an event node is type "trigger" with setting event. Connect with edges from/to using refs or existing node ids; a condition connects with handle true or false. The person sees the whole proposal on a card and must press Apply. A new event is always saved switched OFF, so after approval tell the person the flow is created but they must go to the canvas and switch it on. Secrets (API keys, headers) cannot be set by an agent. Nothing is ever removed.
+
+- Kind: proposes; a person must approve
+- `canvas` (string, required): The canvas key from automation.canvases (an event must sit on its own area's canvas)
+- `summary` (string, required): One plain sentence: what this flow is for
+- `nodes` (array): New steps (up to 30)
+- `edges` (array): New connections (from and to are refs or existing node ids; handle true or false for a condition)
+- `changes` (array): Edits to existing steps: new name and/or settings (only the keys given change)
+
 ## websites.edit
 
 Change a website's label, address (full, with https://) or client. Only what you give changes. A new address is checked straight away.
